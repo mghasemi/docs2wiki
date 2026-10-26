@@ -1,0 +1,12 @@
+import { loadConfig } from "./config.js";
+import { buildServer } from "./app.js";
+
+const config = loadConfig();
+const { app } = await buildServer(config);
+
+try {
+  await app.listen({ port: config.port, host: config.host });
+} catch (error) {
+  app.log.error(error);
+  process.exit(1);
+}

@@ -2,62 +2,16 @@ import { createHash } from "node:crypto";
 import { readFile, stat } from "node:fs/promises";
 import { basename, extname, resolve } from "node:path";
 import fg from "fast-glob";
-import yaml from "js-yaml";
 import { getSourceCacheEntry, setSourceCache } from "../cache/sourceCache.js";
+import { loadMkdocsProject, type MkdocsProject } from "./mkdocs.js";
 import { ConsolidationInput, RawPage, SourceAdapter, SourceFetchResult } from "../types.js";
-
-interface MkdocsConfig {
-  nav?: unknown[];
-}
 
 function titleFromPath(filePath: string): string {
   const name = basename(filePath, extname(filePath));
   return name.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function flattenMkdocsNav(nav: unknown[] | undefined, files: string[], out: string[]): void {
-  if (!nav) {
-    return;
-  }
-
-  for (const item of nav) {
-    if (typeof item === "string") {
-      out.push(item.replace(/^\.\//, ""));
-      continue;
-    }
-
-    if (typeof item === "object" && item) {
-      for (const value of Object.values(item as Record<string, unknown>)) {
-        if (typeof value === "string") {
-          out.push(value.replace(/^\.\//, ""));
-        } else if (Array.isArray(value)) {
-          flattenMkdocsNav(value, files, out);
-        }
-      }
-    }
-  }
-
-  for (const file of files) {
-    if (!out.includes(file)) {
-      out.push(file);
-    }
-  }
-}
-
-async function readMkdocsOrder(rootDir: string, files: string[]): Promise<string[] | null> {
-  const mkdocsPath = resolve(rootDir, "mkdocs.yml");
-  try {
-    const text = await readFile(mkdocsPath, "utf8");
-    const config = yaml.load(text) as MkdocsConfig;
-    const ordered: string[] = [];
-    flattenMkdocsNav(config?.nav, files, ordered);
-    return ordered;
-  } catch {
-    return null;
-  }
-}
-
-async function buildLocalFingerprint(rootDir: string, files: string[]): Promise<string> {
+async function buildLocalFingerprint(rootDir: string, files: string[], mkdocs: MkdocsProject | null): Promise<string> {
   const digest = createHash("sha256");
   const sorted = [...files].sort((a, b) => a.localeCompare(b));
 
@@ -66,11 +20,9 @@ async function buildLocalFingerprint(rootDir: string, files: string[]): Promise<
     digest.update(`${file}:${info.size}:${Math.floor(info.mtimeMs)}\n`);
   }
 
-  try {
-    const mkdocsInfo = await stat(resolve(rootDir, "mkdocs.yml"));
-    digest.update(`mkdocs.yml:${mkdocsInfo.size}:${Math.floor(mkdocsInfo.mtimeMs)}\n`);
-  } catch {
-    // mkdocs file is optional
+  if (mkdocs) {
+    digest.update(`mkdocs:${mkdocs.docsDir}\n`);
+    digest.update(await readFile(mkdocs.configPath));
   }
 
   return digest.digest("hex");
@@ -78,14 +30,16 @@ async function buildLocalFingerprint(rootDir: string, files: string[]): Promise<
 
 export class LocalAdapter implements SourceAdapter {
   async fetchPages(input: ConsolidationInput): Promise<SourceFetchResult> {
-    const rootDir = resolve(input.sourceValue);
+    const projectRoot = resolve(input.sourceValue);
+    const mkdocs = await loadMkdocsProject(projectRoot);
+    const rootDir = mkdocs?.docsDir ?? projectRoot;
     const files = await fg(["**/*.md", "**/*.markdown", "**/*.html", "**/*.htm", "**/*.rst"], {
       cwd: rootDir,
       onlyFiles: true,
       ignore: ["**/node_modules/**", "**/.git/**", "**/dist/**", "**/build/**"],
     });
 
-    const fingerprint = await buildLocalFingerprint(rootDir, files);
+    const fingerprint = await buildLocalFingerprint(rootDir, files, mkdocs);
     const sourceCacheKey = `local:${rootDir}:${input.maxPages}:${fingerprint}`;
 
     if (input.useCache) {
@@ -100,9 +54,18 @@ export class LocalAdapter implements SourceAdapter {
       }
     }
 
-    const order = (await readMkdocsOrder(rootDir, files)) ?? [...files].sort((a, b) => a.localeCompare(b));
+    const known = new Set(files);
+    const navEntries = (mkdocs?.nav ?? []).filter((entry) => known.has(entry.path));
+    const order = [...new Set(navEntries.map((e) => e.path))];
+    for (const file of [...files].sort((a, b) => a.localeCompare(b))) {
+      if (!order.includes(file)) order.push(file);
+    }
     const rank = new Map<string, number>();
     order.forEach((file, i) => rank.set(file, i));
+    const navTitles = new Map<string, string>();
+    for (const entry of navEntries) {
+      if (entry.title && !navTitles.has(entry.path)) navTitles.set(entry.path, entry.title);
+    }
 
     const pages: RawPage[] = [];
     for (const file of files) {
@@ -115,7 +78,7 @@ export class LocalAdapter implements SourceAdapter {
 
       pages.push({
         id: `local:${file}`,
-        title: titleFromPath(file),
+        title: navTitles.get(file) ?? titleFromPath(file),
         sourceRef: file,
         body: content,
         format,

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>docs2wiki</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><h1>docs2wiki</h1><span class="muted">Consolidate docs into one Markdown + PDF</span></header>
+  <main>
+    <section class="card">
+      <h2>New job</h2>
+      <form id="job-form">
+        <label>Title <input id="title" required maxlength="200" placeholder="My Docs"></label>
+
+        <h3>Sources</h3>
+        <div id="sources"></div>
+        <button type="button" id="add-source" class="secondary">+ Add source</button>
+
+        <details>
+          <summary>Advanced</summary>
+          <div class="grid">
+            <label>Max pages <input id="maxPages" type="number" min="1" max="5000" value="500"></label>
+            <label>Max depth <input id="maxDepth" type="number" min="0" max="20" value="6"></label>
+            <label>Cache TTL (min) <input id="ttl" type="number" min="0" value="60"></label>
+          </div>
+          <label class="check"><input id="useCache" type="checkbox" checked> Use cache</label>
+          <label class="check"><input id="strict" type="checkbox"> Fail on stale cache fallback</label>
+          <label class="check"><input id="skipPdf" type="checkbox"> Skip PDF generation</label>
+          <button type="button" id="clear-cache" class="secondary">Clear cache</button>
+        </details>
+
+        <div class="row"><button type="submit" id="submit">Start job</button><span id="form-error" class="error"></span></div>
+      </form>
+    </section>
+
+    <section class="card" id="live" hidden>
+      <h2>Job <span id="live-status" class="badge"></span> <button id="cancel" class="secondary small" hidden>Cancel</button></h2>
+      <pre id="log"></pre>
+      <div id="result"></div>
+    </section>
+
+    <section class="card">
+      <h2>History</h2>
+      <table>
+        <thead><tr><th>Title</th><th>Status</th><th>Created</th><th>Files</th><th></th></tr></thead>
+        <tbody id="history"></tbody>
+      </table>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

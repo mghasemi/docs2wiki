@@ -1,0 +1,11 @@
+node_modules
+dist
+data
+docs-input
+tmp
+out
+.cache
+.git
+tests
+docs
+*.log

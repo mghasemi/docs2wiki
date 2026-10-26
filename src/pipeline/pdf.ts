@@ -1,4 +1,4 @@
-import { access } from "node:fs/promises";
+import { access, rm, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { marked } from "marked";
 import { writeTextFile } from "../utils/fs.js";
@@ -59,8 +59,18 @@ h2 { margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; }
   await writeTextFile(tempHtmlPath, htmlDoc);
 
   const wkhtmltopdfCommand = await resolveWkhtmltopdfCommand();
-  const result = await runCommand(wkhtmltopdfCommand, [tempHtmlPath, outPdfPath]);
-  if (result.exitCode !== 0) {
+  await rm(outPdfPath, { force: true });
+  const result = await runCommand(wkhtmltopdfCommand, [
+    "--load-error-handling",
+    "ignore",
+    "--load-media-error-handling",
+    "ignore",
+    tempHtmlPath,
+    outPdfPath,
+  ]);
+  // wkhtmltopdf can exit non-zero on missing resources (e.g. a 404 image) while still writing the PDF.
+  const pdfWritten = await stat(outPdfPath).then((info) => info.size > 0).catch(() => false);
+  if (result.exitCode !== 0 && !pdfWritten) {
     throw new Error(
       `wkhtmltopdf failed. Ensure wkhtmltopdf is installed and available on PATH, or set WKHTMLTOPDF_PATH. ${result.stderr || result.stdout}`,
     );

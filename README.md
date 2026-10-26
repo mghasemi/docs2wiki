@@ -7,10 +7,20 @@ A TypeScript CLI that ingests documentation from one or more sources and produce
 Supported source types:
 - GitHub Wiki URL
 - Local docs folder (.md, .html, .rst)
+- MkDocs project (point `--local` at the folder containing `mkdocs.yml`; see below)
 - ReadTheDocs URL (full in-domain crawl)
+
+## Web UI (Docker)
+
+```bash
+docker compose up --build   # then open http://localhost:8765 (port set by HOST_PORT in .env)
+```
+
+See [docs/ui.md](docs/ui.md).
 
 ## Documentation
 
+- Web UI and Docker: [docs/ui.md](docs/ui.md)
 - Docs index: [docs/index.md](docs/index.md)
 - Architecture: [docs/architecture.md](docs/architecture.md)
 - Report schema guide: [docs/report-schema.md](docs/report-schema.md)
@@ -97,6 +107,7 @@ node dist/cli.js --title "Docs" --rtd "https://project.readthedocs.io/en/latest/
 
 ## Notes
 
+- MkDocs: if the local folder contains `mkdocs.yml` (or `.yaml`), pages are read from its `docs_dir` (default `docs/`, falling back to the folder itself), ordered by `nav`, and `nav` titles are used as page titles. External nav links are skipped, nav-less pages are appended alphabetically, and `docs_dir` values outside the project are ignored. Themes, plugins and `exclude_docs` are not applied.
 - Use `--skip-pdf` when `wkhtmltopdf` is not installed.
 - Use `--report-json` to emit schema-versioned CI-friendly run metadata.
 - Detailed option references and troubleshooting are in [docs/operations.md](docs/operations.md).
