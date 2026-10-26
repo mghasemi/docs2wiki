@@ -1,0 +1,38 @@
+{
+  "name": "docs-unifier",
+  "version": "0.1.0",
+  "description": "CLI to consolidate a wiki/docs source into one Markdown and one PDF",
+  "type": "module",
+  "bin": {
+    "docs-unifier": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "test": "vitest run",
+    "test:report-schema": "vitest run tests/reportSchema.test.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "axios": "^1.11.0",
+    "cheerio": "^1.1.2",
+    "commander": "^14.0.0",
+    "fast-glob": "^3.3.3",
+    "js-yaml": "^4.1.0",
+    "marked": "^15.0.12",
+    "node-html-markdown": "^1.3.0",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.2.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.10"
+  }
+}

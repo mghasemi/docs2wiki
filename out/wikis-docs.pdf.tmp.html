@@ -1,0 +1,452 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Documentation Export</title>
+<style>
+body { font-family: "Segoe UI", Tahoma, sans-serif; line-height: 1.5; margin: 24px; }
+pre, code { font-family: Consolas, "Courier New", monospace; }
+pre { background: #f5f5f5; padding: 12px; border-radius: 6px; overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+h1, h2 { page-break-after: avoid; }
+h2 { margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; }
+</style>
+</head>
+<body><h1>Wikis Project Docs</h1>
+<p>Generated on: 2026-07-17T17:17:38.127Z</p>
+<h2>Table of Contents</h2>
+<ul>
+<li><a href="#architecture">Architecture</a></li>
+<li><a href="#examples">Examples</a></li>
+<li><a href="#index">Index</a></li>
+<li><a href="#operations">Operations</a></li>
+<li><a href="#report-schema">Report Schema</a></li>
+</ul>
+<hr>
+<h2>Architecture</h2>
+<p><a id="architecture"></a></p>
+<p>Source: architecture.md</p>
+<h1>Architecture</h1>
+<h2>Overview</h2>
+<p>docs-unifier is a TypeScript CLI that ingests documentation from one or more sources and emits:</p>
+<ul>
+<li>one consolidated Markdown document</li>
+<li>one consolidated PDF document (unless skipped)</li>
+</ul>
+<p>Primary flow:</p>
+<ol>
+<li>Parse CLI arguments into a ConsolidationInput model.</li>
+<li>Resolve one or more source adapters.</li>
+<li>Fetch raw pages from each source.</li>
+<li>Normalize content to Markdown and harden links/assets.</li>
+<li>Assemble one merged Markdown document with TOC.</li>
+<li>Optionally render PDF.</li>
+<li>Emit structured run metadata and optional JSON report.</li>
+</ol>
+<h2>Source Adapters</h2>
+<p>Supported sources:</p>
+<ul>
+<li>GitHub Wiki adapter</li>
+<li>Local filesystem adapter</li>
+<li>ReadTheDocs adapter</li>
+</ul>
+<p>Each adapter returns a SourceFetchResult containing:</p>
+<ul>
+<li>pages</li>
+<li>adapter id</li>
+<li>source cache status</li>
+<li>optional detail message</li>
+<li>optional warning details</li>
+</ul>
+<h2>Caching Model</h2>
+<p>Two caching layers are used:</p>
+<ol>
+<li>Source fetch cache</li>
+</ol>
+<ul>
+<li>Stores adapter-level raw page payloads.</li>
+<li>Supports TTL.</li>
+<li>Can return stale fallback for some remote sources.</li>
+</ul>
+<ol start="2">
+<li>Consolidation output cache</li>
+</ol>
+<ul>
+<li>Stores output metadata keyed by source digest and run options.</li>
+<li>Skips regeneration when source digest is unchanged.</li>
+</ul>
+<h2>Multi-Source Merge</h2>
+<p>When multiple sources are provided:</p>
+<ol>
+<li>Sources are fetched in CLI argument order.</li>
+<li>Each source&#39;s pages are offset in ordering to preserve source grouping.</li>
+<li>Pages are concatenated and normalized into one merged output.</li>
+</ol>
+<p>Run result includes:</p>
+<ul>
+<li>sourceFetch (primary/legacy)</li>
+<li>sourceFetches (full per-source list)</li>
+</ul>
+<h2>Normalization</h2>
+<p>Normalization pipeline:</p>
+<ol>
+<li>Convert inputs to Markdown (Markdown passthrough, HTML conversion, RST conversion).</li>
+<li>Clean markdown whitespace and structure.</li>
+<li>Harden links:</li>
+</ol>
+<ul>
+<li>normalize relative document links</li>
+<li>rewrite relative asset/image links to ./assets/... virtual paths</li>
+</ul>
+<ol start="4">
+<li>Attach warnings when fallback behavior occurs.</li>
+</ol>
+<h2>Rendering</h2>
+<p>Markdown is assembled into a unified document with:</p>
+<ul>
+<li>title</li>
+<li>generated timestamp</li>
+<li>table of contents</li>
+<li>per-page sections and source references</li>
+</ul>
+<p>PDF generation uses wkhtmltopdf over generated HTML.</p>
+<h2>Errors and Strict Mode</h2>
+<p>Strict stale fallback mode can fail a run when stale source cache fallback is used.</p>
+<ul>
+<li>Exit code: 2</li>
+<li>Report status: failed-strict-stale-fallback</li>
+</ul>
+<h2>Core Files</h2>
+<ul>
+<li>src/cli.ts</li>
+<li>src/consolidate.ts</li>
+<li>src/adapters/</li>
+<li>src/pipeline/</li>
+<li>src/cache/</li>
+<li>report.schema.json</li>
+</ul>
+<hr>
+<h2>Examples</h2>
+<p><a id="examples"></a></p>
+<p>Source: examples.md</p>
+<h1>Examples and Expected Output</h1>
+<p>This page provides practical command examples with representative output snippets.</p>
+<h2>Example 1: Successful Local Run</h2>
+<p>Command:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --local .\docs --skip-pdf --report-json .\out\run-success.json
+</code></pre>
+<p>Representative console output:</p>
+<pre><code class="language-text">Done. Pages: 42
+Cache: miss
+Source fetch: adapter=local cacheStatus=miss detail=Source pages read from filesystem and cached.
+Source cache stats: hits=0 misses=1 staleFallbacks=0 disabled=0
+Markdown: C:\repo\out\combined.md
+Warnings: 1
+Report JSON: C:\repo\out\run-success.json
+</code></pre>
+<p>Representative report fields:</p>
+<pre><code class="language-json">{
+  &quot;schemaVersion&quot;: &quot;1.0.0&quot;,
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;result&quot;: {
+    &quot;sourceFetch&quot;: {
+      &quot;adapter&quot;: &quot;local&quot;,
+      &quot;cacheStatus&quot;: &quot;miss&quot;
+    },
+    &quot;sourceCacheStats&quot;: {
+      &quot;hits&quot;: 0,
+      &quot;misses&quot;: 1,
+      &quot;staleFallbacks&quot;: 0,
+      &quot;disabled&quot;: 0
+    }
+  }
+}
+</code></pre>
+<h2>Example 2: Multi-Source Success</h2>
+<p>Command:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;All Docs&quot; --source local=.\docs --source rtd=https://project.readthedocs.io/en/latest/ --skip-pdf --report-json .\out\run-multi.json
+</code></pre>
+<p>Representative console output:</p>
+<pre><code class="language-text">Done. Pages: 128
+Cache: miss
+Source fetch: adapter=local cacheStatus=hit detail=Source pages loaded from local adapter cache.
+Source fetches:
+- adapter=local cacheStatus=hit detail=Source pages loaded from local adapter cache.
+- adapter=readthedocs cacheStatus=miss detail=ReadTheDocs pages crawled from network and cached.
+Source cache stats: hits=1 misses=1 staleFallbacks=0 disabled=0
+Markdown: C:\repo\out\all.md
+Report JSON: C:\repo\out\run-multi.json
+</code></pre>
+<p>Representative report fields:</p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;success&quot;,
+  &quot;input&quot;: {
+    &quot;sources&quot;: [
+      { &quot;sourceKind&quot;: &quot;local&quot;, &quot;sourceValue&quot;: &quot;.\\docs&quot; },
+      { &quot;sourceKind&quot;: &quot;readthedocs&quot;, &quot;sourceValue&quot;: &quot;https://project.readthedocs.io/en/latest/&quot; }
+    ]
+  },
+  &quot;result&quot;: {
+    &quot;sourceFetches&quot;: [
+      { &quot;adapter&quot;: &quot;local&quot;, &quot;cacheStatus&quot;: &quot;hit&quot; },
+      { &quot;adapter&quot;: &quot;readthedocs&quot;, &quot;cacheStatus&quot;: &quot;miss&quot; }
+    ]
+  }
+}
+</code></pre>
+<h2>Example 3: Strict Stale Fallback Failure</h2>
+<p>Command:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --rtd &quot;https://project.readthedocs.io/en/latest/&quot; --strict-stale-fallback --skip-pdf --report-json .\out\run-strict.json
+</code></pre>
+<p>Representative console output when stale fallback is used:</p>
+<pre><code class="language-text">Done. Pages: 15
+Cache: miss
+Source fetch: adapter=readthedocs cacheStatus=stale-fallback detail=Network crawl produced no pages; reused stale cached ReadTheDocs pages.
+Source cache stats: hits=0 misses=0 staleFallbacks=1 disabled=0
+Markdown: C:\repo\out\combined.md
+Warnings: 2
+Report JSON: C:\repo\out\run-strict.json
+Error: strict stale fallback mode is enabled and stale cached source data was used.
+</code></pre>
+<p>Outcome:</p>
+<ul>
+<li>Process exit code is 2.</li>
+<li>Report status is failed-strict-stale-fallback.</li>
+</ul>
+<p>Representative report fields:</p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;failed-strict-stale-fallback&quot;,
+  &quot;result&quot;: {
+    &quot;warningDetails&quot;: [
+      { &quot;code&quot;: &quot;SOURCE_STALE_FALLBACK_READTHEDOCS&quot;, &quot;severity&quot;: &quot;warning&quot; },
+      { &quot;code&quot;: &quot;SOURCE_STALE_FALLBACK&quot;, &quot;severity&quot;: &quot;warning&quot; }
+    ],
+    &quot;sourceFetch&quot;: {
+      &quot;adapter&quot;: &quot;readthedocs&quot;,
+      &quot;cacheStatus&quot;: &quot;stale-fallback&quot;
+    },
+    &quot;sourceCacheStats&quot;: {
+      &quot;staleFallbacks&quot;: 1
+    }
+  }
+}
+</code></pre>
+<h2>Example 4: Common Warning Interpretation</h2>
+<p>If pandoc is not installed and .rst files are processed, a warning can appear:</p>
+<pre><code class="language-text">Pandoc not found or failed; .rst content embedded as raw block.
+</code></pre>
+<p>Mapped warning code:</p>
+<ul>
+<li>RST_PANDOC_UNAVAILABLE</li>
+</ul>
+<p>If a relative image link is rewritten to virtual assets path, warning can appear:</p>
+<pre><code class="language-text">Asset link rewritten to virtual assets path: ../images/logo.png -&gt; ./assets/images/logo.png
+</code></pre>
+<p>Mapped warning code:</p>
+<ul>
+<li>ASSET_LINK_REWRITTEN</li>
+</ul>
+<hr>
+<h2>Index</h2>
+<p><a id="index"></a></p>
+<p>Source: index.md</p>
+<h1>Documentation Index</h1>
+<ul>
+<li>Architecture: docs/architecture.md</li>
+<li>Report Schema Guide: docs/report-schema.md</li>
+<li>Operations Runbook: docs/operations.md</li>
+<li>Examples and Expected Output: docs/examples.md</li>
+</ul>
+<hr>
+<h2>Operations</h2>
+<p><a id="operations"></a></p>
+<p>Source: operations.md</p>
+<h1>Operations Runbook</h1>
+<h2>Prerequisites</h2>
+<p>Runtime requirements:</p>
+<ul>
+<li>Node.js 20+</li>
+<li>git in PATH (GitHub Wiki sources)</li>
+<li>wkhtmltopdf in PATH (PDF output)</li>
+<li>pandoc optional (better RST conversion)</li>
+</ul>
+<h2>Common Commands</h2>
+<p>For representative console/report outputs, see docs/examples.md.</p>
+<p>Build:</p>
+<pre><code class="language-powershell">npm run build
+</code></pre>
+<p>Run tests:</p>
+<pre><code class="language-powershell">npm run test
+</code></pre>
+<p>Run report schema test only:</p>
+<pre><code class="language-powershell">npm run test:report-schema
+</code></pre>
+<h2>Typical Runs</h2>
+<p>Single local source:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --local .\docs --out-md .\out\combined.md --out-pdf .\out\combined.pdf
+</code></pre>
+<p>Single ReadTheDocs source:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;RTD&quot; --rtd &quot;https://project.readthedocs.io/en/latest/&quot; --skip-pdf --out-md .\out\rtd.md
+</code></pre>
+<p>Multi-source merge:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;All Docs&quot; --source local=.\docs --source rtd=https://project.readthedocs.io/en/latest/ --skip-pdf --out-md .\out\all.md
+</code></pre>
+<h2>Caching Controls</h2>
+<p>Use default cache:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --local .\docs --cache-dir .\.cache
+</code></pre>
+<p>Disable cache:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --local .\docs --no-cache
+</code></pre>
+<p>Change source cache TTL:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --local .\docs --source-cache-ttl-minutes 30
+</code></pre>
+<h2>Strict Stale Fallback</h2>
+<p>Enable strict mode:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --rtd &quot;https://project.readthedocs.io/en/latest/&quot; --strict-stale-fallback --report-json .\out\run.json
+</code></pre>
+<p>Behavior:</p>
+<ul>
+<li>If stale source fallback is used, process exits with code 2.</li>
+<li>Report status is failed-strict-stale-fallback.</li>
+</ul>
+<h2>Report Output</h2>
+<p>Generate report:</p>
+<pre><code class="language-powershell">node dist/cli.js --title &quot;Docs&quot; --local .\docs --skip-pdf --report-json .\out\run-report.json
+</code></pre>
+<p>Validate report schema in CI:</p>
+<ul>
+<li>report.schema.json</li>
+<li>npm run test:report-schema</li>
+</ul>
+<h2>Troubleshooting</h2>
+<p>Issue: git clone failures for wiki sources</p>
+<ul>
+<li>Verify repository/wiki URL.</li>
+<li>Verify git is installed and in PATH.</li>
+<li>Check network/authentication.</li>
+</ul>
+<p>Issue: PDF generation fails</p>
+<ul>
+<li>Ensure wkhtmltopdf is installed.</li>
+<li>Use --skip-pdf for markdown-only runs.</li>
+</ul>
+<p>Issue: RST warnings present</p>
+<ul>
+<li>Install pandoc.</li>
+<li>Confirm pandoc is reachable in PATH.</li>
+</ul>
+<p>Issue: strict mode failures</p>
+<ul>
+<li>Inspect warningDetails and sourceFetches in report.</li>
+<li>Restore source connectivity or run without strict mode.</li>
+</ul>
+<h2>Monitoring Signals</h2>
+<p>Watch in report/result:</p>
+<ul>
+<li>sourceCacheStats.staleFallbacks &gt; 0</li>
+<li>warningDetails entries with SOURCE_STALE_FALLBACK*</li>
+<li>repeated RST_PANDOC_UNAVAILABLE</li>
+</ul>
+<hr>
+<h2>Report Schema</h2>
+<p><a id="report-schema"></a></p>
+<p>Source: report-schema.md</p>
+<h1>Report Schema Guide</h1>
+<h2>Purpose</h2>
+<p>The run report is an optional JSON artifact produced via --report-json. It is intended for CI pipelines, observability, and automated quality checks.</p>
+<p>Schema file:</p>
+<ul>
+<li>report.schema.json</li>
+</ul>
+<p>Current schema version:</p>
+<ul>
+<li>1.0.0</li>
+</ul>
+<h2>Top-Level Fields</h2>
+<p>Required top-level fields:</p>
+<ul>
+<li>schemaVersion</li>
+<li>generatedAt</li>
+<li>status</li>
+<li>input</li>
+<li>result</li>
+</ul>
+<p>status values:</p>
+<ul>
+<li>success</li>
+<li>failed-strict-stale-fallback</li>
+</ul>
+<h2>Input Section</h2>
+<p>The input object captures effective runtime configuration:</p>
+<ul>
+<li>sourceKind</li>
+<li>sourceValue</li>
+<li>sources (for multi-source runs)</li>
+<li>title</li>
+<li>outMarkdownPath</li>
+<li>outPdfPath</li>
+<li>maxPages</li>
+<li>maxDepth</li>
+<li>skipPdf</li>
+<li>strictStaleFallback</li>
+<li>useCache</li>
+<li>cacheDir</li>
+<li>sourceCacheTtlMinutes</li>
+</ul>
+<h2>Result Section</h2>
+<p>The result object captures outcome details:</p>
+<ul>
+<li>markdownPath</li>
+<li>pdfPath (optional)</li>
+<li>pagesProcessed</li>
+<li>warnings (string messages)</li>
+<li>warningDetails (structured warning entries)</li>
+<li>fromCache</li>
+<li>sourceFetch (primary/legacy)</li>
+<li>sourceFetches (per-source list)</li>
+<li>sourceCacheStats</li>
+</ul>
+<h2>Warning Details</h2>
+<p>Each warning entry contains:</p>
+<ul>
+<li>code</li>
+<li>message</li>
+<li>severity (warning | error)</li>
+</ul>
+<p>Example warning codes:</p>
+<ul>
+<li>RST_PANDOC_UNAVAILABLE</li>
+<li>ASSET_LINK_REWRITTEN</li>
+<li>SOURCE_STALE_FALLBACK</li>
+<li>SOURCE_STALE_FALLBACK_READTHEDOCS</li>
+<li>SOURCE_STALE_FALLBACK_GITHUB_WIKI</li>
+</ul>
+<h2>Source Cache Stats</h2>
+<p>sourceCacheStats includes:</p>
+<ul>
+<li>hits</li>
+<li>misses</li>
+<li>staleFallbacks</li>
+<li>disabled</li>
+</ul>
+<p>These counters are aggregated across all sources in multi-source runs.</p>
+<h2>Validation in CI</h2>
+<p>Schema validation test command:</p>
+<pre><code class="language-powershell">npm run test:report-schema
+</code></pre>
+<p>Full test suite command:</p>
+<pre><code class="language-powershell">npm run test
+</code></pre>
+<h2>Compatibility Guidance</h2>
+<p>When changing report payload shape:</p>
+<ol>
+<li>Bump schemaVersion.</li>
+<li>Update report.schema.json.</li>
+<li>Update tests/reportSchema.test.ts.</li>
+<li>Document migration notes in changelog/release notes.</li>
+</ol>
+<hr>
+</body>
+</html>

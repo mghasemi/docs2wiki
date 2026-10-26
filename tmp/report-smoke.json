@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-07-17T04:08:34.417Z",
+  "input": {
+    "sourceKind": "local",
+    "sourceValue": ".\\tests\\fixtures\\local-ordered",
+    "title": "Report Smoke",
+    "outMarkdownPath": "C:\\Code\\Wikis\\tmp\\report-smoke.md",
+    "outPdfPath": "C:\\Code\\Wikis\\combined.pdf",
+    "maxPages": 500,
+    "maxDepth": 6,
+    "skipPdf": true,
+    "useCache": true,
+    "cacheDir": "C:\\Code\\Wikis\\.cache",
+    "sourceCacheTtlMinutes": 60
+  },
+  "result": {
+    "markdownPath": "C:\\Code\\Wikis\\tmp\\report-smoke.md",
+    "pagesProcessed": 4,
+    "warnings": [
+      "Pandoc not found or failed; .rst content embedded as raw block."
+    ],
+    "fromCache": false,
+    "sourceCacheStats": {
+      "hits": 0,
+      "misses": 1,
+      "staleFallbacks": 0,
+      "disabled": 0
+    }
+  }
+}

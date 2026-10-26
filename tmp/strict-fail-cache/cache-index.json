@@ -1,0 +1,25 @@
+{
+  "entries": {
+    "1d6316e60e3f04c7dc4af63ef83e98a11b2bfdf61eec106d1542d372e8d2e5f2": {
+      "sourceDigest": "4819438d95d2a1977e740345c1a6090e3febee4e8f73f4449dee9d45a566ca0c",
+      "pagesProcessed": 1,
+      "warnings": [
+        "ReadTheDocs fetch failed or returned no usable pages; stale source cache was used.",
+        "Used stale source cache fallback because remote source retrieval failed. Output may be outdated."
+      ],
+      "warningDetails": [
+        {
+          "code": "SOURCE_STALE_FALLBACK_READTHEDOCS",
+          "message": "ReadTheDocs fetch failed or returned no usable pages; stale source cache was used.",
+          "severity": "warning"
+        },
+        {
+          "code": "SOURCE_STALE_FALLBACK",
+          "message": "Used stale source cache fallback because remote source retrieval failed. Output may be outdated.",
+          "severity": "warning"
+        }
+      ],
+      "updatedAt": "2026-07-17T04:25:21.636Z"
+    }
+  }
+}

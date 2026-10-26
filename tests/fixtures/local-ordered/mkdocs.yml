@@ -1,0 +1,7 @@
+site_name: Sample
+nav:
+  - Intro: intro.md
+  - Guide:
+      - Setup: guide/setup.md
+  - Api: api.html
+  - Notes: notes.rst

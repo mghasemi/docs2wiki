@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-07-17T17:08:45.736Z",
+  "status": "success",
+  "input": {
+    "sourceKind": "local",
+    "sourceValue": ".\\docs",
+    "sources": [
+      {
+        "sourceKind": "local",
+        "sourceValue": ".\\docs"
+      }
+    ],
+    "title": "Wikis Project Docs",
+    "outMarkdownPath": "C:\\Code\\Wikis\\out\\wikis-docs.md",
+    "outPdfPath": "C:\\Code\\Wikis\\combined.pdf",
+    "maxPages": 500,
+    "maxDepth": 6,
+    "skipPdf": true,
+    "strictStaleFallback": false,
+    "useCache": true,
+    "cacheDir": "C:\\Code\\Wikis\\.cache",
+    "sourceCacheTtlMinutes": 60
+  },
+  "result": {
+    "markdownPath": "C:\\Code\\Wikis\\out\\wikis-docs.md",
+    "pagesProcessed": 5,
+    "warnings": [],
+    "warningDetails": [],
+    "fromCache": false,
+    "sourceFetch": {
+      "adapter": "local",
+      "cacheStatus": "miss",
+      "detail": "Source pages read from filesystem and cached."
+    },
+    "sourceFetches": [
+      {
+        "adapter": "local",
+        "cacheStatus": "miss",
+        "detail": "Source pages read from filesystem and cached."
+      }
+    ],
+    "sourceCacheStats": {
+      "hits": 0,
+      "misses": 1,
+      "staleFallbacks": 0,
+      "disabled": 0
+    }
+  }
+}

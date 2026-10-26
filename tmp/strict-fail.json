@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-07-17T04:25:21.640Z",
+  "status": "failed-strict-stale-fallback",
+  "input": {
+    "sourceKind": "readthedocs",
+    "sourceValue": "https://example.invalid/docs/",
+    "title": "Strict Fail Smoke",
+    "outMarkdownPath": "C:\\Code\\Wikis\\tmp\\strict-fail.md",
+    "outPdfPath": "C:\\Code\\Wikis\\combined.pdf",
+    "maxPages": 20,
+    "maxDepth": 1,
+    "skipPdf": true,
+    "strictStaleFallback": true,
+    "useCache": true,
+    "cacheDir": "C:\\Code\\Wikis\\tmp\\strict-fail-cache",
+    "sourceCacheTtlMinutes": 60
+  },
+  "result": {
+    "markdownPath": "C:\\Code\\Wikis\\tmp\\strict-fail.md",
+    "pagesProcessed": 1,
+    "warnings": [
+      "ReadTheDocs fetch failed or returned no usable pages; stale source cache was used.",
+      "Used stale source cache fallback because remote source retrieval failed. Output may be outdated."
+    ],
+    "warningDetails": [
+      {
+        "code": "SOURCE_STALE_FALLBACK_READTHEDOCS",
+        "message": "ReadTheDocs fetch failed or returned no usable pages; stale source cache was used.",
+        "severity": "warning"
+      },
+      {
+        "code": "SOURCE_STALE_FALLBACK",
+        "message": "Used stale source cache fallback because remote source retrieval failed. Output may be outdated.",
+        "severity": "warning"
+      }
+    ],
+    "fromCache": false,
+    "sourceFetch": {
+      "adapter": "readthedocs",
+      "cacheStatus": "stale-fallback",
+      "detail": "Network crawl produced no pages; reused stale cached ReadTheDocs pages."
+    },
+    "sourceCacheStats": {
+      "hits": 0,
+      "misses": 0,
+      "staleFallbacks": 1,
+      "disabled": 0
+    }
+  }
+}

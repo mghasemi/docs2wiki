@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-07-17T15:29:28.157Z",
+  "status": "success",
+  "input": {
+    "sourceKind": "local",
+    "sourceValue": ".\\tests\\fixtures\\local-ordered",
+    "sources": [
+      {
+        "sourceKind": "local",
+        "sourceValue": ".\\tests\\fixtures\\local-ordered"
+      },
+      {
+        "sourceKind": "local",
+        "sourceValue": ".\\tests\\fixtures\\local-ordered"
+      }
+    ],
+    "title": "Multi Source Smoke",
+    "outMarkdownPath": "C:\\Code\\Wikis\\tmp\\multi-source-smoke.md",
+    "outPdfPath": "C:\\Code\\Wikis\\combined.pdf",
+    "maxPages": 500,
+    "maxDepth": 6,
+    "skipPdf": true,
+    "strictStaleFallback": false,
+    "useCache": true,
+    "cacheDir": "C:\\Code\\Wikis\\.cache",
+    "sourceCacheTtlMinutes": 60
+  },
+  "result": {
+    "markdownPath": "C:\\Code\\Wikis\\tmp\\multi-source-smoke.md",
+    "pagesProcessed": 8,
+    "warnings": [
+      "Pandoc not found or failed; .rst content embedded as raw block.",
+      "Pandoc not found or failed; .rst content embedded as raw block."
+    ],
+    "warningDetails": [
+      {
+        "code": "RST_PANDOC_UNAVAILABLE",
+        "message": "Pandoc not found or failed; .rst content embedded as raw block.",
+        "severity": "warning"
+      },
+      {
+        "code": "RST_PANDOC_UNAVAILABLE",
+        "message": "Pandoc not found or failed; .rst content embedded as raw block.",
+        "severity": "warning"
+      }
+    ],
+    "fromCache": false,
+    "sourceFetch": {
+      "adapter": "local",
+      "cacheStatus": "miss",
+      "detail": "Source pages read from filesystem and cached."
+    },
+    "sourceFetches": [
+      {
+        "adapter": "local",
+        "cacheStatus": "miss",
+        "detail": "Source pages read from filesystem and cached."
+      },
+      {
+        "adapter": "local",
+        "cacheStatus": "hit",
+        "detail": "Source pages loaded from local adapter cache."
+      }
+    ],
+    "sourceCacheStats": {
+      "hits": 1,
+      "misses": 1,
+      "staleFallbacks": 0,
+      "disabled": 0
+    }
+  }
+}

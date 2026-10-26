@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-07-17T17:17:16.006Z",
+  "status": "success",
+  "input": {
+    "sourceKind": "local",
+    "sourceValue": ".\\docs",
+    "sources": [
+      {
+        "sourceKind": "local",
+        "sourceValue": ".\\docs"
+      }
+    ],
+    "title": "PDF Smoke",
+    "outMarkdownPath": "C:\\Code\\Wikis\\tmp\\pdf-smoke.md",
+    "outPdfPath": "C:\\Code\\Wikis\\tmp\\pdf-smoke.pdf",
+    "maxPages": 500,
+    "maxDepth": 6,
+    "skipPdf": false,
+    "strictStaleFallback": false,
+    "useCache": true,
+    "cacheDir": "C:\\Code\\Wikis\\.cache",
+    "sourceCacheTtlMinutes": 60
+  },
+  "result": {
+    "markdownPath": "C:\\Code\\Wikis\\tmp\\pdf-smoke.md",
+    "pdfPath": "C:\\Code\\Wikis\\tmp\\pdf-smoke.pdf",
+    "pagesProcessed": 5,
+    "warnings": [],
+    "warningDetails": [],
+    "fromCache": false,
+    "sourceFetch": {
+      "adapter": "local",
+      "cacheStatus": "hit",
+      "detail": "Source pages loaded from local adapter cache."
+    },
+    "sourceFetches": [
+      {
+        "adapter": "local",
+        "cacheStatus": "hit",
+        "detail": "Source pages loaded from local adapter cache."
+      }
+    ],
+    "sourceCacheStats": {
+      "hits": 1,
+      "misses": 0,
+      "staleFallbacks": 0,
+      "disabled": 0
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-07-17T04:24:59.063Z",
+  "status": "success",
+  "input": {
+    "sourceKind": "local",
+    "sourceValue": ".\\tests\\fixtures\\local-ordered",
+    "title": "Strict Mode Smoke",
+    "outMarkdownPath": "C:\\Code\\Wikis\\tmp\\strict-smoke.md",
+    "outPdfPath": "C:\\Code\\Wikis\\combined.pdf",
+    "maxPages": 500,
+    "maxDepth": 6,
+    "skipPdf": true,
+    "strictStaleFallback": true,
+    "useCache": true,
+    "cacheDir": "C:\\Code\\Wikis\\.cache",
+    "sourceCacheTtlMinutes": 60
+  },
+  "result": {
+    "markdownPath": "C:\\Code\\Wikis\\tmp\\strict-smoke.md",
+    "pagesProcessed": 4,
+    "warnings": [
+      "Pandoc not found or failed; .rst content embedded as raw block."
+    ],
+    "warningDetails": [
+      {
+        "code": "RST_PANDOC_UNAVAILABLE",
+        "message": "Pandoc not found or failed; .rst content embedded as raw block.",
+        "severity": "warning"
+      }
+    ],
+    "fromCache": false,
+    "sourceFetch": {
+      "adapter": "local",
+      "cacheStatus": "hit",
+      "detail": "Source pages loaded from local adapter cache."
+    },
+    "sourceCacheStats": {
+      "hits": 1,
+      "misses": 0,
+      "staleFallbacks": 0,
+      "disabled": 0
+    }
+  }
+}
